@@ -1,3 +1,5 @@
+// Copyright Arina Turcu 313CA
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -8,7 +10,7 @@ int main() {
     max = 0;
     freq = calloc(1, sizeof(int));
 
-    while(!feof(stdin) && scanf("%d", &x) == 1) {
+    while (!feof(stdin) && scanf("%d", &x) == 1) {
         if (x > max) {
             old = max;
             max = x;
