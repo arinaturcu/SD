@@ -92,7 +92,7 @@ void put(struct Hashtable *ht, char *key, char *value) {
             ht->buckets[index] = new;
         }
     }
-    
+
     if (bucket == NULL || ht->buckets[index]->key == NULL ||
         ht->buckets[index]->value == NULL) {
         fprintf(stderr, "Error: Nu s-a putut aloca memorie");
