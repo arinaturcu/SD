@@ -36,6 +36,11 @@ void init_ht(struct Hashtable *ht, int hmax,
     unsigned int (*hash_function)(void *)) {
     ht->buckets = (struct info **)malloc(hmax * sizeof(struct info *));
 
+    if (ht->buckets == NULL) {
+        fprintf(stderr, "Error: Nu s-a putut aloca memorie");
+        return;
+    }
+
     for (int i = 0; i < hmax; ++i) {
         ht->buckets[i] = NULL;
     }
@@ -87,6 +92,12 @@ void put(struct Hashtable *ht, char *key, char *value) {
             ht->buckets[index] = new;
         }
     }
+    
+    if (bucket == NULL || ht->buckets[index]->key == NULL ||
+        ht->buckets[index]->value == NULL) {
+        fprintf(stderr, "Error: Nu s-a putut aloca memorie");
+        return;
+    }
 }
 
 void free_ht(struct Hashtable **ht_loc) {
@@ -109,6 +120,12 @@ int main() {
     int i;
 
     ht = (struct Hashtable *)malloc(sizeof(struct Hashtable));
+
+    if (ht == NULL) {
+        fprintf(stderr, "Error: Nu s-a putut aloca memorie");
+        return -1;
+    }
+
     init_ht(ht, NMAX, hash_function_string);
 
     while (!feof(stdin) && scanf("%s", word) == 1) {

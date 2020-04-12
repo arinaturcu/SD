@@ -10,12 +10,22 @@ int main() {
     max = 0;
     freq = calloc(1, sizeof(int));
 
+    if (freq == NULL) {
+        fprintf(stderr, "Error: Nu s-a putut aloca memorie");
+        return -1;
+    }
+
     while (!feof(stdin) && scanf("%d", &x) == 1) {
         if (x > max) {
             old = max;
             max = x;
 
             freq = (int *)realloc(freq, sizeof(int) * (max + 1));
+
+            if (freq == NULL) {
+                fprintf(stderr, "Error: Nu s-a putut aloca memorie");
+                return -1;
+            }
 
             for (int j = old + 1; j <= max; ++j) {
                 freq[j] = 0;
