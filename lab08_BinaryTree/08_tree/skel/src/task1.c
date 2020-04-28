@@ -15,10 +15,10 @@ void read_tree(b_tree_t *b_tree)
 {
     int i, data, N;
 
-    scanf("%d\n", &N);
+    scanf("%d", &N);
 
     for (i = 0; i < N; ++i) {
-        scanf("%d ", &data);
+        scanf("%d", &data);
 
         b_tree_insert(b_tree, data);
     }
