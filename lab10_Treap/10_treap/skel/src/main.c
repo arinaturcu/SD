@@ -27,7 +27,6 @@ void ascending_nodes(Node *node, int* keys, int *num_keys) {
 		return;
 
 	ascending_nodes(node->left, keys, num_keys);
-    printf("%d ", node->priority);
 	keys[(*num_keys)++] = *(int*)node->data;
 	ascending_nodes(node->right, keys, num_keys);
 }
