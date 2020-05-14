@@ -6,6 +6,9 @@ PARSER=parson
 PUBL=publications
 RUNNER=runner
 CHECKER=checker
+HASHTABLE=Hashtable
+LINKEDLIST=LinkedList
+QUEUE=Queue
 
 INCLUDES=-I$(PARSER) -I.
 LIBS=-lm
@@ -14,7 +17,7 @@ LIBS=-lm
 
 build: tema3
 
-tema3: main.o runner.o $(PARSER).o $(PUBL).o
+tema3: main.o runner.o $(PARSER).o $(LINKEDLIST).o $(HASHTABLE).o $(QUEUE).o $(PUBL).o
 	$(CC) $^ -o $@ -m32 $(LIBS)
 
 main.o: $(CHECKER)/main.c
@@ -25,6 +28,15 @@ $(RUNNER).o: $(CHECKER)/$(RUNNER).c $(CHECKER)/$(RUNNER).h
 
 $(PARSER).o: $(PARSER)/$(PARSER).c $(PARSER)/$(PARSER).h
 	$(CC) $(CFLAGS) $(OPT_CFLGAS) $^ -c
+
+$(LINKEDLIST).o: $(LINKEDLIST).c $(LINKEDLIST).h
+	make --no-print-directory build	
+
+ $(HASHTABLE).o: $(HASHTABLE).c $(HASHTABLE).h
+	make --no-print-directory build
+
+ $(QUEUE).o: $(QUEUE).c $(QUEUE).h
+	make --no-print-directory build
 
 $(PUBL).o: $(PUBL).c $(PUBL).h
 	make --no-print-directory build

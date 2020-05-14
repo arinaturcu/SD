@@ -4,6 +4,9 @@
 #include <stddef.h>
 #include <stdlib.h>
 
+#include "Hashtable.h"
+#include "Queue.h"
+
 /**
  * If the assertion is true, the program is closed and the file and line number
  * at which the program closes are printed to `stderr`, together with a given
