@@ -1,8 +1,11 @@
+/* Copyright Isar Ioana-Teodora, Turcu Arina-Emanuela 313CA */
+
 #ifndef PUBLICATIONS_H_
 #define PUBLICATIONS_H_
 
 #include <stddef.h>
 #include <stdlib.h>
+#include <inttypes.h>
 
 #include "Hashtable.h"
 #include "Queue.h"

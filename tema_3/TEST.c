@@ -25,6 +25,19 @@ struct PublData {
     struct article *paper;
 };
 
+unsigned int hash_function_string(void *a) {
+    /*
+     * Credits: http://www.cse.yorku.ca/~oz/hash.html
+     */
+    unsigned char *puchar_a = (unsigned char*) a;
+    unsigned int hash = 5381;
+    int c;
+
+    while ((c = *puchar_a++))
+        hash = ((hash << 5u) + hash) + c; /* hash * 33 + c */
+
+    return hash;
+}
 
 void add_paper(struct PublData* data, const char* title, const char* venue,
     const int year, const char** author_names, const int64_t* author_ids,
@@ -62,6 +75,10 @@ void add_paper(struct PublData* data, const char* title, const char* venue,
     } 
 }
 
+unsigned int call_hash(void *a) {
+    return hash_function_string(a);
+}
+
 int main() {
     struct PublData *data = malloc(sizeof(struct PublData));
 
@@ -92,6 +109,14 @@ int main() {
     printf("%s -- %s\n", data->paper->authors[0]->institution, data->paper->authors[1]->institution);
     printf("%s -- %s\n", data->paper->fields[0], data->paper->fields[1]);
     printf("%ld -- %ld\n", data->paper->references[0], data->paper->references[1]);
+
+    int a = 2, b = 5;
+    printf("%f\n", (double)a/(double)b);
+
+    const char *venuee = "KI";
+
+    printf("%d\n", call_hash((void *)venuee));
+    printf("%u\n", call_hash((void *)venuee));
 
     return 0;
 }

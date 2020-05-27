@@ -1,3 +1,5 @@
+/* Copyright Isar Ioana-Teodora, Turcu Arina-Emanuela 313CA */
+
 #include <stdlib.h>
 #include <stdio.h>
 

@@ -1,7 +1,4 @@
-/*
- * Hashtable.c
- * Alexandru-Cosmin Mihai
- */
+/* Copyright Isar Ioana-Teodora, Turcu Arina-Emanuela 313CA */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,9 +23,13 @@ int compare_function_ints(void *a, void *b) {
     }
 }
 
-/*
- * Functii de hashing:
- */
+int compare_function_strings(void *a, void *b) {
+    char *str_a = (char *)a;
+    char *str_b = (char *)b;
+
+    return strcmp(str_a, str_b);
+}
+
 unsigned int hash_function_int(void *a) {
     /*
      * Credits: https://stackoverflow.com/a/12996028/7883884
@@ -41,14 +42,25 @@ unsigned int hash_function_int(void *a) {
     return uint_a;
 }
 
-/*
- * Functie apelata dupa alocarea unui hashtable pentru a-l initializa.
- * Trebuie alocate si initializate si listele inlantuite.
- */
-void init_ht(struct Hashtable *ht, int hmax, unsigned int (*hash_function)(void*), int (*compare_function)(void*, void*)) {
-    /* TODO */
+unsigned int hash_function_string(void *a) {
+    /*
+     * Credits: http://www.cse.yorku.ca/~oz/hash.html
+     */
+    unsigned char *puchar_a = (unsigned char *)a;
+    unsigned int hash = 5381;
+    int c;
+
+    while ((c = *puchar_a++))
+        hash = ((hash << 5u) + hash) + c; /* hash * 33 + c */
+
+    return hash;
+}
+
+void init_ht(struct Hashtable *ht, int hmax,
+        unsigned int (*hash_function)(void *),
+        int (*compare_function)(void *, void *)) {
     int i;
-    ht->buckets = (struct LinkedList*)malloc(hmax * sizeof(struct LinkedList));
+    ht->buckets = (struct LinkedList *)malloc(hmax * sizeof(struct LinkedList));
 
     for (i = 0; i < hmax; ++i) {
         init_list(ht->buckets + i);
@@ -60,23 +72,7 @@ void init_ht(struct Hashtable *ht, int hmax, unsigned int (*hash_function)(void*
     ht->compare_function = compare_function;
 }
 
-/*
- * Atentie! Desi cheia este trimisa ca un void pointer (deoarece nu se impune tipul ei), in momentul in care
- * se creeaza o noua intrare in hashtable (in cazul in care cheia nu se gaseste deja in ht), trebuie creata o copie
- * a valorii la care pointeaza key si adresa acestei copii trebuie salvata in structura info asociata intrarii din ht.
- * Pentru a sti cati octeti trebuie alocati si copiati, folositi parametrul key_size_bytes.
- *
- * Motivatie:
- * Este nevoie sa copiem valoarea la care pointeaza key deoarece dupa un apel put(ht, key_actual, value_actual),
- * valoarea la care pointeaza key_actual poate fi alterata (de ex: *key_actual++). Daca am folosi direct adresa
- * pointerului key_actual, practic s-ar modifica din afara hashtable-ului cheia unei intrari din hashtable.
- * Nu ne dorim acest lucru, fiindca exista riscul sa ajungem in situatia in care nu mai stim la ce cheie este
- * inregistrata o anumita valoare.
- */
-
 struct info *get_info(struct Hashtable *ht, int index, void *key) {
-    /* parcurgeti ht->buckets[index] pana dati de key si-l returnati; */
-    /* altfel returnati NULL */
     struct Node *curr;
     struct LinkedList *buck;
     int i = 0;
@@ -86,8 +82,8 @@ struct info *get_info(struct Hashtable *ht, int index, void *key) {
     curr = buck->head;
 
     while (curr != NULL) {
-        if ( ht->compare_function(((struct info *)curr->data)->key, key) == 0 ) {
-            return (struct info*)curr->data;
+        if (ht->compare_function(((struct info *)curr->data)->key, key) == 0) {
+            return (struct info *)curr->data;
         }
         curr = curr->next;
         i++;
@@ -97,15 +93,13 @@ struct info *get_info(struct Hashtable *ht, int index, void *key) {
 }
 
 void put(struct Hashtable *ht, void *key, int key_size_bytes, void *value) {
-    /* TODO */
     int index;
     struct info *data;
-    
+
     index = ht->hash_function(key) % ht->hmax;
     data = get_info(ht, index, key);
 
-    if (data == NULL)
-    {
+    if (data == NULL) {
         data = malloc(sizeof(struct info));
         if (data == NULL) {
             printf("Couldn't alloc\n");
@@ -124,18 +118,44 @@ void put(struct Hashtable *ht, void *key, int key_size_bytes, void *value) {
         add_nth_node(&(ht->buckets[index]), 0x7fffffff, data);
 
         ht->size++;
-
     } else {
+        free(data->value);
         data->value = value;
     }
 }
 
-void* get(struct Hashtable *ht, void *key) {
-    /* TODO */
+void put2(struct Hashtable *ht, void *key, int key_size_bytes, void *value) {
+    int index;
+    struct info *data;
+
+    index = ht->hash_function(key) % ht->hmax;
+
+    data = malloc(sizeof(struct info));
+    if (data == NULL) {
+        printf("Couldn't alloc\n");
+        return;
+    }
+
+    data->key = malloc(key_size_bytes);
+    if (data->key == NULL) {
+        printf("Couldn't alloc\n");
+        return;
+    }
+
+    memcpy(data->key, key, key_size_bytes);
+    data->value = value;
+
+    add_nth_node(&(ht->buckets[index]), 0, data);
+
+    ht->size++;
+}
+
+void *get(struct Hashtable *ht, void *key) {
     int index;
     struct info *information;
 
     index = ht->hash_function(key) % ht->hmax;
+
     information = get_info(ht, index, key);
 
     if (information == NULL) {
@@ -145,13 +165,7 @@ void* get(struct Hashtable *ht, void *key) {
     }
 }
 
-/*
- * Functie care intoarce:
- * 1, daca pentru cheia key a fost asociata anterior o valoare in hashtable folosind functia put
- * 0, altfel.
- */
 int has_key(struct Hashtable *ht, void *key) {
-    /* TODO */
     void *check;
     check = get(ht, key);
 
@@ -162,14 +176,7 @@ int has_key(struct Hashtable *ht, void *key) {
     return 0;
 }
 
-/*
- * Procedura care elimina din hashtable intrarea asociata cheii key.
- * Atentie! Trebuie avuta grija la eliberarea intregii memorii folosite pentru o intrare din hashtable (adica memoria
- * pentru copia lui key --vezi observatia de la procedura put--, pentru structura info si pentru structura Node din
- * lista inlantuita).
- */
 void remove_ht_entry(struct Hashtable *ht, void *key) {
-    /* TODO */
     int index, i;
     struct LinkedList *buck;
     struct Node *entry;
@@ -179,29 +186,23 @@ void remove_ht_entry(struct Hashtable *ht, void *key) {
 
     entry = buck->head;
     i = 0;
-    
+
     while (entry != NULL) {
+        if (ht->compare_function(((struct info *)entry->data)->key, key) == 0) {
+            free(((struct info *)entry->data)->key);
 
-        if ( ht->compare_function(((struct info *)entry->data)->key, key) == 0) {
-            
-            free( ((struct info *)entry->data)->key );
-
-            free( ((struct info *)entry->data)->value );
+            free(((struct info *)entry->data)->value);
             entry = remove_nth_node(buck, i);
             free(entry);
-            
+
             break;
         }
-        
+
         i++;
         entry = entry->next;
     }
 }
 
-/*
- * Procedura care elibereaza memoria folosita de toate intrarile din hashtable, dupa care elibereaza si memoria folosita
- * pentru a stoca structura hashtable.
- */
 void free_ht(struct Hashtable *ht) {
     /* TODO */
     int i;
@@ -212,10 +213,8 @@ void free_ht(struct Hashtable *ht) {
         buck = &(ht->buckets[i]);
 
         while (buck->size > 0) {
-            
-            key = ((struct info*)buck->head->data)->key;
+            key = ((struct info *)buck->head->data)->key;
             remove_ht_entry(ht, key);
-            
         }
     }
 
